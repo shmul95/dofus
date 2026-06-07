@@ -18,11 +18,11 @@
         text = ''
           set -euo pipefail
 
-          export WINEPREFIX="${XDG_STATE_HOME:-$HOME/.local/state}/dofus/prefix"
+          export WINEPREFIX="''${XDG_STATE_HOME:-$HOME/.local/state}/dofus/prefix"
           export WINEARCH="win64"
-          export WINEDEBUG="${WINEDEBUG:--all}"
+          export WINEDEBUG="''${WINEDEBUG:--all}"
 
-          launcher_exe="${DOFUS_LAUNCHER_EXE:-$WINEPREFIX/drive_c/Program Files (x86)/Ankama/Launcher/AnkamaLauncher.exe}"
+          launcher_exe="''${DOFUS_LAUNCHER_EXE:-$WINEPREFIX/drive_c/Program Files (x86)/Ankama/Launcher/AnkamaLauncher.exe}"
 
           mkdir -p "$WINEPREFIX"
 
