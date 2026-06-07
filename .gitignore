@@ -1,0 +1,4 @@
+.direnv/
+result/
+*.swp
+.DS_Store
