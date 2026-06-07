@@ -36,7 +36,9 @@
 
             for candidate in \
               "$WINEPREFIX/drive_c/Program Files (x86)/Ankama/Launcher/AnkamaLauncher.exe" \
-              "$WINEPREFIX/drive_c/Program Files/Ankama/Launcher/AnkamaLauncher.exe"; do
+              "$WINEPREFIX/drive_c/Program Files/Ankama/Launcher/AnkamaLauncher.exe" \
+              "$WINEPREFIX/drive_c/Program Files (x86)/Ankama Launcher/Ankama Launcher.exe" \
+              "$WINEPREFIX/drive_c/Program Files/Ankama Launcher/Ankama Launcher.exe"; do
               if [ -f "$candidate" ]; then
                 printf '%s\n' "$candidate"
                 return 0
