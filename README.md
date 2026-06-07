@@ -25,7 +25,15 @@ dofus
 
 ## First run
 
-The first run initializes the Wine prefix. You still need to install the Ankama launcher / Dofus game into that prefix, because the game itself is proprietary and cannot be bundled into the Nix package.
+The first run initializes the Wine prefix. If the Ankama Launcher is not already installed, the wrapper now downloads the official Windows installer from Ankama and runs it automatically.
+
+You can override the installer source if needed:
+
+```bash
+export DOFUS_INSTALLER_URL=https://download.ankama.com/launcher/full/win
+# or point at a local .exe:
+export DOFUS_INSTALLER_PATH="$HOME/Downloads/AnkamaLauncherSetup.exe"
+```
 
 If your launcher ends up somewhere else, point the wrapper at it:
 
