@@ -36,17 +36,18 @@
             exec wine "$launcher_exe" "$@"
           fi
 
-          printf '%s\n' \
-            'Dofus launcher not found in this Wine prefix.' \
-            '' \
-            "Expected path: $launcher_exe" \
-            '' \
-            'To get started:' \
-            '  1. install the Ankama launcher into the prefix above' \
-            '  2. optionally set DOFUS_LAUNCHER_EXE if the executable lives elsewhere' \
-            '  3. run: dofus' \
-            '' \
-            "You can inspect or reset the prefix at: $WINEPREFIX" >&2
+          cat >&2 <<'EOF'
+          Dofus launcher not found in this Wine prefix.
+
+          Expected path: $launcher_exe
+
+          To get started:
+            1. install the Ankama launcher into the prefix above
+            2. optionally set DOFUS_LAUNCHER_EXE if the executable lives elsewhere
+            3. run: dofus
+
+          You can inspect or reset the prefix at: $WINEPREFIX
+          EOF
 
           exit 1
         '';
