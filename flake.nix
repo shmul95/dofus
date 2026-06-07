@@ -13,6 +13,7 @@
         runtimeInputs = [
           pkgs.cabextract
           pkgs.curl
+          pkgs.findutils
           pkgs.winetricks
           pkgs.wineWowPackages.stable
         ];
@@ -23,9 +24,30 @@
           export WINEARCH="win64"
           export WINEDEBUG="''${WINEDEBUG:--all}"
 
-          launcher_exe="''${DOFUS_LAUNCHER_EXE:-$WINEPREFIX/drive_c/Program Files (x86)/Ankama/Launcher/AnkamaLauncher.exe}";
+          launcher_exe_hint="$WINEPREFIX/drive_c/Program Files (x86)/Ankama/Launcher/AnkamaLauncher.exe";
           install_url="''${DOFUS_INSTALLER_URL:-https://download.ankama.com/launcher/full/win}";
           install_path="''${DOFUS_INSTALLER_PATH:-}";
+
+          find_launcher_exe() {
+            if [ -n "''${DOFUS_LAUNCHER_EXE:-}" ] && [ -f "''${DOFUS_LAUNCHER_EXE}" ]; then
+              printf '%s\n' "''${DOFUS_LAUNCHER_EXE}"
+              return 0
+            fi
+
+            for candidate in \
+              "$WINEPREFIX/drive_c/Program Files (x86)/Ankama/Launcher/AnkamaLauncher.exe" \
+              "$WINEPREFIX/drive_c/Program Files/Ankama/Launcher/AnkamaLauncher.exe"; do
+              if [ -f "$candidate" ]; then
+                printf '%s\n' "$candidate"
+                return 0
+              fi
+            done
+
+            find "$WINEPREFIX/drive_c" \
+              -type f \
+              \( -iname 'AnkamaLauncher.exe' -o -iname 'Ankama Launcher.exe' \) \
+              2>/dev/null | head -n 1
+          }
 
           ensure_prefix() {
             mkdir -p "$WINEPREFIX"
@@ -37,7 +59,8 @@
           }
 
           run_launcher() {
-            if [ -f "$launcher_exe" ]; then
+            launcher_exe="$(find_launcher_exe || true)"
+            if [ -n "$launcher_exe" ]; then
               exec wine "$launcher_exe" "$@"
             fi
           }
@@ -45,7 +68,8 @@
           install_launcher() {
             ensure_prefix
 
-            if [ -f "$launcher_exe" ]; then
+            launcher_exe="$(find_launcher_exe || true)"
+            if [ -n "$launcher_exe" ]; then
               echo "[dofus] Ankama Launcher already exists at: $launcher_exe" >&2
               exec wine "$launcher_exe" "$@"
             fi
@@ -68,7 +92,7 @@
               printf '%s\n' \
                 'Ankama Launcher is not installed in this Wine prefix yet.' \
                 '' \
-                "Expected path: $launcher_exe" \
+                "Expected path: $launcher_exe_hint" \
                 '' \
                 'To install it, either:' \
                 '  1. run: dofus install /path/to/AnkamaLauncherSetup.exe' \
@@ -79,7 +103,8 @@
               exit 1
             fi
 
-            if [ -f "$launcher_exe" ]; then
+            launcher_exe="$(find_launcher_exe || true)"
+            if [ -n "$launcher_exe" ]; then
               echo "[dofus] launching Ankama Launcher from: $launcher_exe" >&2
               exec wine "$launcher_exe"
             fi
@@ -87,7 +112,7 @@
             printf '%s\n' \
               'The installer finished, but the Ankama Launcher was not found afterward.' \
               '' \
-              "Expected path: $launcher_exe" \
+              "Expected path: $launcher_exe_hint" \
               '' \
               'You may need to re-run the launcher manually once it finishes installing, or check the prefix contents.' >&2
             exit 1
@@ -106,18 +131,17 @@
               shift || true
               export WINEDEBUG="+timestamp,+seh,''${WINEDEBUG:+,$WINEDEBUG}"
               ensure_prefix
-              if run_launcher "$@"; then
-                :
+              launcher_exe="$(find_launcher_exe || true)"
+              if [ -n "$launcher_exe" ]; then
+                run_launcher "$@"
+                exit 0
               fi
-              printf '%s\n' \
-                'Launcher not found after enabling debug mode.' \
-                '' \
-                "Expected path: $launcher_exe" >&2
-              exit 1
+              install_launcher "$@"
               ;;
             "")
               ensure_prefix
-              if [ -f "$launcher_exe" ]; then
+              launcher_exe="$(find_launcher_exe || true)"
+              if [ -n "$launcher_exe" ]; then
                 run_launcher "$@"
                 exit 0
               fi
@@ -125,7 +149,8 @@
               ;;
             *)
               ensure_prefix
-              if [ -f "$launcher_exe" ]; then
+              launcher_exe="$(find_launcher_exe || true)"
+              if [ -n "$launcher_exe" ]; then
                 run_launcher "$@"
                 exit 0
               fi
