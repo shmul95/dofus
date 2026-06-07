@@ -93,14 +93,11 @@
             else
               printf '%s\n' \
                 'Ankama Launcher is not installed in this Wine prefix yet.' \
-                '' \
                 "Expected path: $launcher_exe_hint" \
-                '' \
                 'To install it, either:' \
                 '  1. run: dofus install /path/to/AnkamaLauncherSetup.exe' \
                 '  2. export DOFUS_INSTALLER_PATH=/path/to/AnkamaLauncherSetup.exe' \
                 '  3. export DOFUS_INSTALLER_URL=https://download.ankama.com/launcher/full/win' \
-                '' \
                 'Once installed, run: dofus' >&2
               exit 1
             fi
@@ -113,9 +110,7 @@
 
             printf '%s\n' \
               'The installer finished, but the Ankama Launcher was not found afterward.' \
-              '' \
               "Expected path: $launcher_exe_hint" \
-              '' \
               'You may need to re-run the launcher manually once it finishes installing, or check the prefix contents.' >&2
             exit 1
           }
