@@ -87,7 +87,16 @@
               trap 'rm -rf "$tmpdir"' EXIT
               installer="$tmpdir/ankama-installer.exe"
               echo "[dofus] downloading installer from $install_url" >&2
-              curl -fL "$install_url" -o "$installer"
+              curl \
+                --fail \
+                --location \
+                --retry 3 \
+                --retry-all-errors \
+                --user-agent 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36' \
+                --header 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8' \
+                --header 'Accept-Language: en-US,en;q=0.5' \
+                "$install_url" \
+                --output "$installer"
               echo "[dofus] running downloaded installer" >&2
               wine "$installer"
             else
