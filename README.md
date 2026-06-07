@@ -27,6 +27,8 @@ dofus
 
 The first run initializes the Wine prefix. If the Ankama Launcher is not already installed, the wrapper now downloads the official Windows installer from Ankama and runs it automatically.
 
+It also registers the `ankama-launcher://` URI handler locally so the browser-to-launcher login handoff can return to the Wine launcher.
+
 You can override the installer source if needed:
 
 ```bash

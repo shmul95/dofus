@@ -14,6 +14,7 @@
           pkgs.cabextract
           pkgs.curl
           pkgs.findutils
+          pkgs.xdg-utils
           pkgs.winetricks
           pkgs.wineWowPackages.stable
         ];
@@ -27,6 +28,27 @@
           launcher_exe_hint="$WINEPREFIX/drive_c/Program Files (x86)/Ankama/Launcher/AnkamaLauncher.exe";
           install_url="''${DOFUS_INSTALLER_URL:-https://download.ankama.com/launcher/full/win}";
           install_path="''${DOFUS_INSTALLER_PATH:-}";
+
+          register_handler() {
+            applications_dir="''${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+            desktop_file="$applications_dir/ankama-launcher.desktop"
+            dofus_cmd="$(command -v dofus)"
+
+            mkdir -p "$applications_dir"
+            cat >"$desktop_file" <<EOF
+[Desktop Entry]
+Name=Ankama Launcher
+Exec=$dofus_cmd %u
+Type=Application
+NoDisplay=true
+MimeType=x-scheme-handler/ankama-launcher;x-scheme-handler/ankama;
+EOF
+
+            if command -v xdg-mime >/dev/null 2>&1; then
+              xdg-mime default ankama-launcher.desktop x-scheme-handler/ankama-launcher
+              xdg-mime default ankama-launcher.desktop x-scheme-handler/ankama
+            fi
+          }
 
           find_launcher_exe() {
             if [ -n "''${DOFUS_LAUNCHER_EXE:-}" ] && [ -f "''${DOFUS_LAUNCHER_EXE}" ]; then
@@ -69,6 +91,7 @@
 
           install_launcher() {
             ensure_prefix
+            register_handler
 
             launcher_exe="$(find_launcher_exe || true)"
             if [ -n "$launcher_exe" ]; then
@@ -125,6 +148,19 @@
           }
 
           case "''${1:-}" in
+            register-handler)
+              register_handler
+              echo "[dofus] registered Ankama Launcher URI handler" >&2
+              ;;
+            ankama-launcher://*|ankama://*)
+              ensure_prefix
+              launcher_exe="$(find_launcher_exe || true)"
+              if [ -n "$launcher_exe" ]; then
+                echo "[dofus] opening launcher for auth callback: $1" >&2
+                exec wine "$launcher_exe" "$1"
+              fi
+              install_launcher "$@"
+              ;;
             install)
               shift
               install_launcher "$@"
@@ -146,6 +182,7 @@
               ;;
             "")
               ensure_prefix
+              register_handler
               launcher_exe="$(find_launcher_exe || true)"
               if [ -n "$launcher_exe" ]; then
                 run_launcher "$@"
@@ -155,6 +192,7 @@
               ;;
             *)
               ensure_prefix
+              register_handler
               launcher_exe="$(find_launcher_exe || true)"
               if [ -n "$launcher_exe" ]; then
                 run_launcher "$@"
